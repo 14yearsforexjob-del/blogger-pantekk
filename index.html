@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Blogger V1 PR Dari Buk Miraaaaaa</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#04030a;
+  --green:#00ff6a;
+  --purple:#8900ff;
+  --muted: rgba(255,255,255,0.06);
+  --card-bg: rgba(255,255,255,0.012);
+  --glass: rgba(255,255,255,0.02);
+  --shadow: rgba(0,0,0,0.65);
+}
+
+/* Reset & base */
+*{box-sizing:border-box;font-family:Orbitron,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#e7fbff}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071426 66%);overflow:hidden}
+a{color:var(--green);text-decoration:none}
+
+/* Header nav (3 buttons) */
+header{position:fixed;left:12px;right:12px;top:12px;display:flex;justify-content:center;z-index:160}
+.nav{display:flex;gap:12px}
+button.navbtn{
+  padding:10px 18px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);
+  background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.006));
+  color:#e9fbff;font-weight:700;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 12px 36px var(--shadow);
+  transition:transform .16s,box-shadow .16s;
+}
+button.navbtn:active::after{content:"";position:absolute;width:200%;height:200%;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(137,0,255,0.10), transparent 60%);border-radius:50%;animation:ripple .45s}
+@keyframes ripple{from{transform:translate(-50%,-50%) scale(0)} to{transform:translate(-50%,-50%) scale(1)}}
+button.navbtn.active{transform:translateY(-3px);box-shadow:0 26px 80px rgba(137,0,255,0.10)}
+button.navbtn.active::before{content:"";position:absolute;inset:-6px;border-radius:18px;box-shadow:0 0 26px rgba(0,255,106,0.06), inset 0 0 36px rgba(137,0,255,0.03);pointer-events:none}
+
+/* App shell (centered) */
+.app{position:absolute;inset:0;display:flex;justify-content:center;padding-top:100px}
+.shell{width:100%;max-width:980px;height:85vh;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,0.006),rgba(255,255,255,0.002));border:1px solid rgba(255,255,255,0.03);overflow:hidden;position:relative;box-shadow:0 40px 120px rgba(0,0,0,0.7);z-index:40}
+
+/* Hero & page header */
+.headerInner{padding:20px 22px 6px 22px;text-align:center}
+.title{font-size:34px;font-weight:900;color:var(--green);margin:0 0 6px;letter-spacing:-0.6px;text-shadow:0 10px 40px rgba(0,255,106,0.04)}
+.subtitle{color:var(--purple);font-weight:700;margin-top:2px;font-size:13px;opacity:.98}
+
+/* PAGES (stacked, show/hide) */
+.page{position:absolute;inset:84px 0 0 0;padding:20px 22px 28px 22px;overflow:auto;display:none}
+.page.active{display:block}
+
+/* Content column behavior — allow scroll down */
+.contentCol{display:flex;flex-direction:column;align-items:center;gap:18px;padding-bottom:40px}
+
+/* Profile image (Home) */
+.profile{display:flex;justify-content:center;margin-top:6px;margin-bottom:6px}
+.pfp{width:120px;height:120px;object-fit:cover;border-radius:999px;border:3px solid var(--green);box-shadow:0 6px 20px rgba(0,255,106,0.35), 0 0 40px rgba(137,0,255,0.16)}
+
+/* Cards (transparent + glass) */
+.card{
+  width:100%;max-width:760px;padding:16px;border-radius:14px;background:var(--card-bg);
+  backdrop-filter: blur(6px);
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow:0 12px 40px var(--shadow);
+  transition:transform .22s,box-shadow .22s;
+}
+.card:hover{transform:translateY(-6px);box-shadow:0 26px 70px rgba(0,0,0,0.6)}
+.card h3{margin:0;color:var(--purple);font-weight:900}
+.card p{margin:8px 0 0 0;line-height:1.5;color:#e6fbff}
+
+/* Portfolio carousel */
+.carousel{
+  width:100%;max-width:860px;display:flex;align-items:center;gap:12px;position:relative;
+  padding:10px 6px;
+}
+.carouselViewport{overflow:hidden;width:100%}
+.carouselTrack{
+  display:flex;gap:16px;transition:transform .5s cubic-bezier(.2,.9,.2,1);
+  padding:8px;
+}
+.slide{
+  min-width:280px;max-width:320px;background:var(--card-bg);border:1px solid rgba(255,255,255,0.03);
+  border-radius:12px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  display:flex;flex-direction:column;gap:8px;
+}
+.slide h4{margin:0;color:var(--green);font-weight:900}
+.slide p{margin:0;color:#dffaff;font-size:13px}
+.carouselControls{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;display:flex;justify-content:space-between;align-items:center;padding:0 8px}
+.ctrlBtn{pointer-events:auto;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);padding:10px;border-radius:999px;color:var(--green);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.6)}
+.ctrlBtn:active{transform:translateY(1px)}
+
+/* Contact / comments */
+.commentBox{display:flex;flex-direction:column;gap:10px}
+.inputRow{display:flex;gap:8px;flex-wrap:wrap}
+.inputRow input, .inputRow textarea{
+  flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.28);color:#e7fbff;outline:none
+}
+.inputRow textarea{min-height:84px;resize:vertical}
+.btnSubmit{padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--green),var(--purple));border:none;color:#001;cursor:pointer;font-weight:800}
+.commentsList{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.commentItem{background:linear-gradient(180deg, rgba(255,255,255,0.008), rgba(255,255,255,0.004));padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+
+/* orbit analog clock (elliptical) */
+#analogOrbit{position:fixed;width:150px;height:150px;left:50%;top:50%;transform-origin:center;pointer-events:none;z-index:160;animation:ellipOrbit 34s linear infinite}
+@keyframes ellipOrbit{
+  0%{transform:translate(-50%,-50%) translateX(0) translateY(0) rotate(0)}
+  25%{transform:translate(-50%,-50%) translateX(300px) translateY(-48px) rotate(90deg)}
+  50%{transform:translate(-50%,-50%) translateX(0) translateY(0) rotate(180deg)}
+  75%{transform:translate(-50%,-50%) translateX(-300px) translateY(48px) rotate(270deg)}
+  100%{transform:translate(-50%,-50%) translateX(0) translateY(0) rotate(360deg)}
+}
+#analogClock{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#00151a,#00252b);border:3px solid rgba(0,255,106,0.10);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 18px 60px rgba(0,0,0,0.6)}
+.reactor{position:absolute;inset:0;display:grid;place-items:center}
+.outer{position:absolute;width:136px;height:136px;border-radius:50%;box-shadow:0 0 60px rgba(0,255,106,0.06);border:1px solid rgba(0,255,106,0.06);filter:blur(4px);opacity:.9}
+.ring1{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(137,0,255,0.06);box-shadow:0 0 40px rgba(137,0,255,0.04)}
+.glowAura{position:absolute;width:170px;height:170px;border-radius:50%;box-shadow:0 0 80px rgba(137,0,255,0.08);opacity:.22;filter:blur(22px)}
+.clock-number{position:absolute;font-weight:900;color:var(--purple);text-shadow:0 8px 22px rgba(137,0,255,0.06)}
+.n12{top:10%;left:50%;transform:translateX(-50%);font-size:16px}
+.n3{top:50%;right:12%;transform:translateY(-50%);font-size:16px}
+.n6{bottom:10%;left:50%;transform:translateX(-50%);font-size:16px}
+.n9{top:50%;left:12%;transform:translateY(-50%);font-size:16px}
+.hand{position:absolute;left:50%;top:50%;transform-origin:50% 100%;transform:translate(-50%,-100%) rotate(0);border-radius:4px;transition:transform .12s linear}
+.hand.hour{width:6px;height:36px;background:linear-gradient(180deg,var(--green),var(--purple));z-index:6}
+.hand.min{width:4px;height:52px;background:linear-gradient(180deg,var(--purple),var(--green));z-index:5}
+.hand.sec{width:2px;height:66px;background:#ffd36b;z-index:7}
+.center-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--green);left:50%;top:50%;transform:translate(-50%,-50%);box-shadow:0 16px 44px rgba(0,255,106,0.14)}
+
+/* loader cinematic (liquid neon) */
+#loader{position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.88), rgba(3,3,6,0.88));display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .22s}
+#loader.active{opacity:1;pointer-events:auto}
+.loaderBox{display:flex;flex-direction:column;align-items:center;gap:14px}
+.ring{width:90px;height:90px;border-radius:50%;display:grid;place-items:center;border:3px solid rgba(255,255,255,0.04);box-shadow:0 18px 60px rgba(0,0,0,0.6)}
+.loadLiquid{width:360px;height:14px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));overflow:hidden;position:relative;box-shadow:0 10px 40px rgba(0,0,0,0.5)}
+.loadLiquid .wave{position:absolute;left:-70%;top:0;height:100%;width:70%;background:linear-gradient(90deg,var(--green), var(--purple));filter:blur(8px);transform-origin:left center;animation:liquidMove 1.25s cubic-bezier(.2,.9,.2,1) infinite;opacity:0.98}
+@keyframes liquidMove{0%{left:-70%;transform:scaleX(.88)}50%{left:28%;transform:scaleX(1.08)}100%{left:130%;transform:scaleX(.88)}}
+.loaderText{color:var(--green);font-weight:800;letter-spacing:.6px;font-size:13px}
+.type{border-right:2px solid rgba(255,255,255,0.06);padding-right:6px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{border-color:transparent}}
+
+/* responsive */
+@media (max-width:820px){
+  .slide{min-width:220px}
+  .loadLiquid{width:220px}
+  .title{font-size:28px}
+  #analogOrbit{width:120px;height:120px;animation-duration:44s}
+  #analogClock{width:92px;height:92px}
+  .pfp{width:92px;height:92px}
+}
+</style>
+</head>
+<body>
+
+<!-- visual effects: rain canvas -->
+<canvas id="rCanvas" aria-hidden="true"></canvas>
+
+<!-- lightning layers -->
+<div class="light" id="flashTop" aria-hidden="true"></div>
+<div class="light" id="flashBottom" aria-hidden="true"></div>
+<div id="shockwave" aria-hidden="true"></div>
+
+<!-- loader (global) -->
+<div id="loader" aria-hidden="true">
+  <div class="loaderBox" role="status" aria-live="polite">
+    <div class="ring" aria-hidden="true"><div class="inner"></div></div>
+    <div class="loadLiquid" aria-hidden="true"><div class="wave" aria-hidden="true"></div></div>
+    <div class="loaderText"><span id="typed" class="type" aria-hidden="true"></span></div>
+  </div>
+</div>
+
+<!-- header nav -->
+<header>
+  <div class="nav" role="navigation" aria-label="Main">
+    <button class="navbtn" id="btnHome">Home</button>
+    <button class="navbtn" id="btnPorto">Portfolio</button>
+    <button class="navbtn" id="btnContact">Contact</button>
+  </div>
+</header>
+
+<!-- app shell -->
+<div class="app">
+  <div class="shell" role="main" aria-live="polite">
+
+    <div class="headerInner">
+      <div class="title">Arkaaa Wiratama</div>
+      <div class="subtitle">Blogger By Arkaaaa</div>
+    </div>
+
+    <!-- PAGES -->
+    <!-- HOME -->
+    <section id="pageHome" class="page active" aria-label="Home page">
+      <div class="contentCol">
+        <div class="profile" id="profileWrap">
+          <img src="https://i.postimg.cc/FsKmcfKd/17634512036381047965382298097502.jpg" alt="Foto Profil" class="pfp" id="pfp" />
+        </div>
+
+        <div class="card">
+          <h3>Tentang Aku.</h3>
+          <p>
+            Aku Arka.
+Orang yang suka berbicara, bukan karena tidak malu—tapi karena suka keramaian
+Aku nyaman berjalan di tempat ramai, memikirkan hal-hal yang biasanya dilewati orang.
+Teknologi, Blockchain, Bitcoin dan hal hal teknologi besar yg akan mendatang di 2030 nanti, itu bukan sekadar omong kosong buatku—itu akan beneran terjadi, teknologi AI yg canggih akan menggantikan pekerjaan manusia, seperti robot humanoid yg sudah beredar luas. aku memahami dunia dengan caraku sendiri.
+Aku tidak selalu memperhatikan inflasi bahan makanan dan bahan pokok lainnya di 2030 mendatang, memperhatikan seperlunya, dan memilih diam ketika aku sudah mengetahui nya.
+Aku tidak terburu-buru.
+Tidak mencari sorotan.
+Aku lebih suka berada di titik antara:
+tenang, tapi tidak hilang.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Perjalanan — Kelas 7 → Kelas 8</h3>
+          <p>
+            Kelas 7 buat aku itu kayak bab pertama dari buku yang belum pernah aku baca.
+Awalnya bingung, lingkungannya baru, orang-orangnya acak—ada yang rame, ada yang aneh, ada yang sok kenal.
+Aku masuk skull dengan kepala botak di mpls, tapi hati cukup santai untuk mengikuti pelajaran.
+Kadang aku menikmati suasana baru, kadang cuma ingin pulang cepat.
+Tapi dari situ, pelan-pelan aku belajar satu hal:
+setiap masa punya ritmenya sendiri.
+
+Di kelas 7 juga ada momen serunya.
+Tawa random bareng temen yang baru kenal sehari, obrolan receh yang ga penting tapi ngena, dan hal-hal sepele yang entah kenapa masih kebayang sampai sekarang.
+Ada masa-masa aku mikir,
+“oh ternyata hidup nggak semenakutkan itu.”
+Tapi ada juga hari-hari yang bikin aku males ngomong sama siapa pun.
+
+Masuk kelas 8, semuanya berubah pelan-pelan tapi pasti.
+Bukan yang tiba-tiba dramatis, tapi lebih ke perasaan…
+“aku mulai ngerti cara hidup di sini.”
+
+Temen makin kebentuk, circle makin jelas, dan aku mulai sadar mana orang yang benar-benar ada, mana yang cuma numpang lewat.
+Seru? Banyak.
+Bahkan terlalu banyak sampai kadang susah nyari mana yang paling berkesan.
+Jalan bareng, ngerjain hal bodoh bareng, ngobrol tentang hal yang nggak penting tapi berarti…
+itu semua jadi bagian yang sulit dilupain.
+
+Tapi nggak semuanya cerah.
+Ada juga bagian gelapnya.
+Beberapa hal yang harus aku simpan sendiri, beberapa luka kecil yang cuma aku yang tau, beberapa pertanyaan yang belum ketemu jawabannya sampai sekarang.
+Ada momen bingung soal diri sendiri, bingung soal orang lain, atau bingung cuma karena hidup tiba-tiba ribut tanpa alasan.
+
+Tapi di antara itu semua, aku tetap berjalan.
+Dengan ritme yang lebih dewasa, cara pandang yang lebih luas, dan hati yang lebih kuat.
+Karena ternyata, perjalanan dari kelas 7 ke 8 itu bukan cuma soal naik kelas…
+tapi soal belajar memahami orang lain, memahami dunia, dan sedikit demi sedikit — memahami diriku sendiri.
+
+Dan meskipun banyak hal berubah, satu hal tetap sama:
+aku masih melangkah, dengan cara yang aku pilih sendiri dan jalan aku sendiri.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Latest</h3>
+          <p>Bagian Komen Ada Di Contact Yaa ( Janlup Komen 😹 ) AHIHIHIHIHIHIHI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO (Carousel) -->
+    <section id="pagePorto" class="page" aria-label="Portfolio page">
+      <div class="contentCol">
+        <div class="card">
+          <h3>Portfolio Showcase</h3>
+          <p>Geser slide atau gunakan panah.</p>
+        </div>
+
+        <div class="carousel" role="region" aria-label="Portfolio carousel">
+          <div class="carouselViewport">
+            <div class="carouselTrack" id="carouselTrack">
+              <!-- slides -->
+              <div class="slide" data-id="1">
+                <h4>Notes 1</h4>
+                <p>Portofolio Busuk😹</p>
+              </div>
+              <div class="slide" data-id="2">
+                <h4>Notes 2</h4>
+                <p>Blogger Arkaaa Dari Html</p>
+              </div>
+              <div class="slide" data-id="3">
+                <h4>Notes 3</h4>
+                <p>Jam Terbuat Dari JS Function</p>
+              </div>
+              <div class="slide" data-id="4">
+                <h4>Notes 4</h4>
+                <p>Lagi Belajar FrontEnd</p>
+              </div>
+              <div class="slide" data-id="5">
+                <h4>Notes 5</h4>
+                <p>Game Map Roblox</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="carouselControls" aria-hidden="false">
+            <button class="ctrlBtn" id="prevBtn" aria-label="Previous slide">&larr;</button>
+            <button class="ctrlBtn" id="nextBtn" aria-label="Next slide">&rarr;</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Notes</h3>
+          <p>Pr Dari Buk Miraaa</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT (with comments) -->
+    <section id="pageContact" class="page" aria-label="Contact page">
+      <div class="contentCol">
+        <div class="card">
+          <h3>Contact</h3>
+          <p>Tuliskan komentar woilah😹</p>
+        </div>
+
+        <div class="card">
+          <h3>Tinggalkan Komentar</h3>
+          <div class="commentBox" id="commentBox">
+            <div class="inputRow">
+              <input id="cName" type="text" placeholder="Nama (wajib)" />
+            </div>
+            <div class="inputRow">
+              <textarea id="cMsg" placeholder="Komentar kamu..." ></textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+              <button class="btnSubmit" id="submitComment">Kirim</button>
+            </div>
+            <div style="margin-top:8px;color:var(--green);font-weight:800">Komentar:</div>
+            <div class="commentsList" id="commentsList" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Alternatif Kontak</h3>
+          <p>WA : +6282377858990 - GMAIL : tesarkaaaa123@gmail.com</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- orbit analog clock -->
+<div id="analogOrbit" aria-hidden="false">
+  <div id="analogClock" role="img" aria-label="Jam dinding WIB">
+    <div class="reactor">
+      <div class="outer"></div>
+      <div class="ring1"></div>
+      <div class="glowAura"></div>
+    </div>
+
+    <div class="clock-number n12">12</div>
+    <div class="clock-number n3">3</div>
+    <div class="clock-number n6">6</div>
+    <div class="clock-number n9">9</div>
+
+    <div class="hand hour" id="hourHand"></div>
+    <div class="hand min" id="minHand"></div>
+    <div class="hand sec" id="secHand"></div>
+    <div class="center-dot"></div>
+  </div>
+</div>
+
+<script>
+/* ------------------ Utilities & small helpers ------------------ */
+const pages = {
+  home: document.getElementById('pageHome'),
+  porto: document.getElementById('pagePorto'),
+  contact: document.getElementById('pageContact')
+};
+const navIds = ['btnHome','btnPorto','btnContact'];
+const loader = document.getElementById('loader');
+const typedEl = document.getElementById('typed');
+
+/* --------- digital timezone helper (WIB for clock) --------- */
+function getJakartaDate(){
+  const s = new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });
+  return new Date(s);
+}
+
+/* ------------- Loader: smooth cinematic (typed) ------------- */
+function typeText(el, text, speed=36){
+  el.textContent = '';
+  let i=0;
+  const t = setInterval(()=>{ el.textContent += text.charAt(i) || ''; i++; if(i>text.length) clearInterval(t); }, speed);
+}
+function showLoaderSequence(cb){
+  loader.classList.add('active');
+  typedEl.textContent = '';
+  typeText(typedEl, 'Initializing reactor core...');
+  setTimeout(()=>{ typedEl.textContent = ''; typeText(typedEl, 'Charging neon matrix...'); }, 600);
+  setTimeout(()=>{ typedEl.textContent = ''; typeText(typedEl, 'Calibrating optics...'); }, 1200);
+  setTimeout(()=>{ typedEl.textContent = ''; typeText(typedEl, 'Rendering UI...'); }, 1800);
+  setTimeout(()=>{ loader.classList.remove('active'); if(typeof cb === 'function') cb(); }, 2600);
+}
+
+/* ------------------- Navigation handler ------------------- */
+function setActiveNav(id){
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showPage(key){
+  Object.values(pages).forEach(p=>p.classList.remove('active'));
+  if(key === 'home') pages.home.classList.add('active');
+  if(key === 'porto') pages.porto.classList.add('active');
+  if(key === 'contact') pages.contact.classList.add('active');
+}
+
+navIds.forEach(id=>{
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', ()=>{
+    setActiveNav(id);
+    showLoaderSequence(()=> {
+      if(id === 'btnHome') showPage('home');
+      if(id === 'btnPorto') showPage('porto');
+      if(id === 'btnContact') showPage('contact');
+      const shell = document.querySelector('.page.active');
+      if(shell) shell.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+});
+document.getElementById('btnHome').classList.add('active');
+
+/* ------------------- Carousel (Portfolio) ------------------- */
+const track = document.getElementById('carouselTrack');
+const slides = Array.from(track.children);
+let currentIndex = 0;
+function getSlideWidth(){ return slides[0].getBoundingClientRect().width + 16; }
+let slideWidth = getSlideWidth();
+
+function setTrackPos(){
+  slideWidth = getSlideWidth();
+  track.style.transform = `translateX(${ - currentIndex * slideWidth }px)`;
+}
+window.addEventListener('resize', setTrackPos);
+setTrackPos();
+
+document.getElementById('prevBtn').addEventListener('click', ()=> {
+  currentIndex = Math.max(0, currentIndex - 1);
+  setTrackPos();
+});
+document.getElementById('nextBtn').addEventListener('click', ()=> {
+  currentIndex = Math.min(slides.length - 1, currentIndex + 1);
+  setTrackPos();
+});
+
+// Autoplay
+let autoPlayTimer = setInterval(()=> {
+  currentIndex = (currentIndex + 1) % slides.length;
+  setTrackPos();
+}, 3800);
+
+// Pause on hover
+track.addEventListener('mouseenter', ()=> clearInterval(autoPlayTimer));
+track.addEventListener('mouseleave', ()=> autoPlayTimer = setInterval(()=> { currentIndex = (currentIndex + 1) % slides.length; setTrackPos(); }, 3800));
+
+// Touch / swipe support
+let startX = 0, isDown = false;
+track.addEventListener('touchstart', (e)=> { startX = e.touches[0].clientX; isDown = true; clearInterval(autoPlayTimer); });
+track.addEventListener('touchend', (e)=> { if(!isDown) return; const dx = e.changedTouches[0].clientX - startX; if(dx > 40) currentIndex = Math.max(0, currentIndex - 1); if(dx < -40) currentIndex = Math.min(slides.length - 1, currentIndex + 1); setTrackPos(); isDown = false; autoPlayTimer = setInterval(()=> { currentIndex = (currentIndex + 1) % slides.length; setTrackPos(); }, 3800); });
+
+/* ------------------- Comments (localStorage) ------------------- */
+const commentsKey = 'v51_comments_v1';
+function loadComments(){
+  const raw = localStorage.getItem(commentsKey);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveComments(list){
+  localStorage.setItem(commentsKey, JSON.stringify(list));
+}
+function renderComments(){
+  const list = loadComments();
+  const out = document.getElementById('commentsList');
+  out.innerHTML = '';
+  if(list.length === 0){
+    out.innerHTML = '<div style="color:var(--green)">Belum ada komentar. Jadilah yang pertama!</div>';
+    return;
+  }
+  list.slice().reverse().forEach(c=>{
+    const el = document.createElement('div'); el.className = 'commentItem';
+    el.innerHTML = `<div style="font-weight:900;color:var(--green)">${escapeHtml(c.name)} <span style="font-weight:600;color:#9fe3ff;font-size:12px;margin-left:8px">${new Date(c.time).toLocaleString()}</span></div>
+      <div style="margin-top:6px;color:#e6fbff">${escapeHtml(c.msg)}</div>`;
+    out.appendChild(el);
+  });
+}
+function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+
+document.getElementById('submitComment').addEventListener('click', ()=>{
+  const name = document.getElementById('cName').value.trim();
+  const msg = document.getElementById('cMsg').value.trim();
+  if(!name){ alert('Nama wajib diisi'); return; }
+  if(!msg){ alert('Komentar kosong'); return; }
+  const list = loadComments();
+  list.push({ name, msg, time: Date.now() });
+  saveComments(list);
+  document.getElementById('cName').value = '';
+  document.getElementById('cMsg').value = '';
+  renderComments();
+  setTimeout(()=> { const el = document.getElementById('commentsList'); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }, 200);
+});
+renderComments();
+
+/* ------------------- Rain (visible drizzle) ------------------- */
+const canvas = document.getElementById('rCanvas'), ctx = canvas.getContext('2d');
+let W = innerWidth, H = innerHeight;
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize(); addEventListener('resize', resize);
+
+const drops = [];
+for(let i=0;i<420;i++){ drops.push({ x: Math.random()*W, y: Math.random()*H, l: 10+Math.random()*30, ys: 6+Math.random()*14, xs: -2+Math.random()*4 }); }
+
+(function rainLoop(){
+  ctx.clearRect(0,0,W,H);
+  ctx.globalAlpha = 0.98;
+  for(let d of drops){
+    ctx.beginPath();
+    ctx.moveTo(d.x,d.y);
+    ctx.lineTo(d.x + d.xs*1.8, d.y + d.l);
+    ctx.strokeStyle = 'rgba(0,255,106,0.18)'; // toxic green neon
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    d.x += d.xs; d.y += d.ys;
+    if(d.y > H){ d.y = -20; d.x = Math.random()*W; }
+  }
+  requestAnimationFrame(rainLoop);
+})();
+
+/* ------------------- Lightning + shockwave ------------------- */
+function flash(el, opacity=1, dur=120){
+  el.style.opacity = opacity; setTimeout(()=> el.style.opacity = 0, dur);
+}
+function lightningLoop(){
+  if(Math.random() < 0.14) flash(document.getElementById('flashTop'), 0.95, 120);
+  if(Math.random() < 0.28) setTimeout(()=> flash(document.getElementById('flashBottom'), 0.55, 140), 60);
+  if(Math.random() < 0.18){
+    const sw = document.getElementById('shockwave');
+    sw.style.opacity = 0.45; sw.style.transform = 'scale(1.25)';
+    setTimeout(()=>{ sw.style.opacity = 0; sw.style.transform = 'scale(1)'; }, 160);
+  }
+  setTimeout(lightningLoop, 2000 + Math.random()*3600);
+}
+lightningLoop();
+
+/* ------------------- Analog Reactor Core (WIB) ------------------- */
+const hourHand = document.getElementById('hourHand'), minHand = document.getElementById('minHand'), secHand = document.getElementById('secHand');
+function updateAnalog(){
+  const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+  const ms = d.getMilliseconds();
+  const s = d.getSeconds() + ms/1000;
+  const m = d.getMinutes() + s/60;
+  const h = (d.getHours()%12) + m/60;
+  const sdeg = s/60 * 360;
+  const mdeg = m/60 * 360;
+  const hdeg = h/12 * 360;
+  secHand.style.transform = `translate(-50%,-100%) rotate(${sdeg}deg)`;
+  minHand.style.transform = `translate(-50%,-100%) rotate(${mdeg}deg)`;
+  hourHand.style.transform = `translate(-50%,-100%) rotate(${hdeg}deg)`;
+}
+setInterval(updateAnalog, 150); updateAnalog();
+
+/* ------------------- small parallax for cards ------------------- */
+document.addEventListener('mousemove', e=>{
+  const cx = innerWidth/2, cy = innerHeight/2;
+  const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+  document.querySelectorAll('.card').forEach((el,i)=>{
+    const mv = 6 + (i%3);
+    el.style.transform = `translateY(${ -6 + dy*6 }px) translateX(${dx*mv}px)`;
+  });
+});
+
+/* ------------------- graceful: hide profile if photo not provided ------------------- */
+const pfp = document.getElementById('pfp');
+if(pfp && (pfp.getAttribute('src') === '' || pfp.getAttribute('src') === 'FOTO-LO.jpg')){
+  // leave placeholder — replace FOTO-LO.jpg with your photo file for proper display
+}
+</script>
+</body>
+</html>
